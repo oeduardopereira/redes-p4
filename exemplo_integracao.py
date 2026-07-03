@@ -22,23 +22,29 @@ def dados_recebidos(conexao, dados):
 def conexao_aceita(conexao):
     conexao.registrar_recebedor(dados_recebidos)   # usa esse mesmo recebedor para toda conexão aceita
 
-linha_serial = PTY()
-outra_ponta = '192.168.123.1'
-nossa_ponta = '192.168.123.2'
+async def main():
+    linha_serial = PTY()
+    outra_ponta = '192.168.123.1'
+    nossa_ponta = '192.168.123.2'
 
-print('Para conectar a outra ponta da camada física, execute:')
-print('  sudo slattach -v -p slip {}'.format(linha_serial.pty_name))
-print('  sudo ifconfig sl0 {} pointopoint {}'.format(outra_ponta, nossa_ponta))
-print()
-print('O serviço ficará acessível no endereço {}'.format(nossa_ponta))
-print()
+    print('Para conectar a outra ponta da camada física, execute:')
+    print('  sudo slattach -v -p slip {}'.format(linha_serial.pty_name))
+    print('  sudo ifconfig sl0 {} pointopoint {}'.format(outra_ponta, nossa_ponta))
+    print()
+    print('O serviço ficará acessível no endereço {}'.format(nossa_ponta))
+    print()
 
-enlace = CamadaEnlace({outra_ponta: linha_serial})
-rede = IP(enlace)
-rede.definir_endereco_host(nossa_ponta)
-rede.definir_tabela_encaminhamento([
-    ('0.0.0.0/0', outra_ponta)
-])
-servidor = Servidor(rede, 7000)
-servidor.registrar_monitor_de_conexoes_aceitas(conexao_aceita)
-asyncio.get_event_loop().run_forever()
+    enlace = CamadaEnlace({outra_ponta: linha_serial})
+    rede = IP(enlace)
+    rede.definir_endereco_host(nossa_ponta)
+    rede.definir_tabela_encaminhamento([
+        ('0.0.0.0/0', outra_ponta)
+    ])
+    servidor = Servidor(rede, 7000)
+    servidor.registrar_monitor_de_conexoes_aceitas(conexao_aceita)
+
+    await asyncio.Event().wait()
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
