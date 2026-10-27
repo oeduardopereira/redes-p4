@@ -78,4 +78,6 @@ class Enlace:
             quadro, self.buffer = self.buffer.split(b'\xc0', 1)
             # descarta datagramas vazios
             if quadro:
+                quadro = quadro.replace(b'\xdb\xdc', b'\xc0')
+                quadro = quadro.replace(b'\xdb\xdd', b'\xdb')
                 self.callback(quadro)
