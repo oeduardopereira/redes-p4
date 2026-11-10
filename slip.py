@@ -80,4 +80,11 @@ class Enlace:
             if quadro:
                 quadro = quadro.replace(b'\xdb\xdc', b'\xc0')
                 quadro = quadro.replace(b'\xdb\xdd', b'\xdb')
-                self.callback(quadro)
+                # tenta entregar o datagrama para a camada de cima
+                try:
+                    self.callback(quadro)
+                # se a camada de cima der erro (datagrama mal formado)
+                except Exception:
+                    print("Erro ao processar datagrama, descartando")
+                    # esvazia o buffer para que o datagrama ruim não seja repassado na próxima leitura
+                    self.buffer = b''
